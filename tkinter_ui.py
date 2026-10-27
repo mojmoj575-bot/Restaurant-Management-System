@@ -797,6 +797,28 @@ def run_app():
     # نگهداری مشتری ثبت ‌شده
     current_customer: Customer | None = None
 
+    def select_existing_customer():
+        nonlocal current_customer
+
+        try:
+            customer_id = int(
+                customer_entries["customer_id"].get().strip()
+            )
+
+            customer = Customer.load_customer(customer_id)
+            current_customer = customer
+
+            messagebox.showinfo(
+                "انتخاب مشتری",
+                "مشتری با موفقیت برای سفارش انتخاب شد."
+            )
+
+        except (ValueError, FileNotFoundError) as error:
+            messagebox.showerror(
+                "خطا در انتخاب مشتری",
+                str(error)
+            )
+
     def register_customer():
         nonlocal current_customer
 
@@ -837,12 +859,32 @@ def run_app():
         columnspan=2,
         pady=20
     )
+
+    select_customer_button = ttk.Button(
+        customer_tab,
+        text="انتخاب مشتری موجود",
+        command=select_existing_customer
+    )
+
+    select_customer_button.pack(pady=5)
+
     restaurant_menu = Menu()
 
     try:
         restaurant_menu = Menu.load_menu()
     except FileNotFoundError:
         restaurant_menu = Menu()
+
+        default_foods = {
+            "پیتزا": 250000,
+            "برگر": 180000,
+            "پاستا": 220000,
+            "سالاد سزار": 150000,
+            "نوشابه": 30000
+        }
+
+        for food_name, price in default_foods.items():
+            restaurant_menu.add_item(food_name, price)
 
     menu_frame = ttk.LabelFrame(
         menu_tab,
